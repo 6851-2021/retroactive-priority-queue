@@ -52,18 +52,22 @@ def split(root, key, eq_left=False):
         s_left, s_right = split(root.right, key, eq_left)
         root.right = s_left
         root.update_aggregate()
+        assert root.right is not root
 
-        return root, s_left
+        return root, s_right
     else:
         s_left, s_right = split(root.left, key, eq_left)
         root.left = s_right
         root.update_aggregate()
 
+        assert root.left is not root
         return s_left, root
 
 def merge(left, right):
-    if left is None or right is None:
-        return left if right is None else right
+    if left is None:
+        return right
+    elif right is None:
+        return left
     elif left.p < right.p:
         left.right = merge(left.right, right)
         left.update_aggregate()
@@ -73,14 +77,9 @@ def merge(left, right):
         right.update_aggregate()
         return right
 
-def insert(root, node):
-    left, node_and_right = split(root, node.key)
-    old_node, right = split(node_and_right, node.key, eq_left=True)
-    return merge(left, merge(node, right))
-
 def remove(root, key):
     if root is None:
-        return None
+        raise KeyError
     elif root.key == key:
         return merge(root.left, root.right)
     else:
@@ -105,9 +104,11 @@ class Treap:
     def __init__(self, agg_f):
         self.agg_f = agg_f
         self.root = None
+        self.len = 0
 
     def remove(self, key):
         self.root = remove(self.root, key)
+        self.len -= 1
 
     def agg_before(self, key, include_eq = False):
         before, after = split(self.root, key, eq_left = include_eq)
@@ -127,9 +128,25 @@ class Treap:
     def __getitem__(self, key):
         return find(self.root, key)
 
+    def __contains__(self, key):
+        try:
+            self.__getitem__(key)
+            return True
+        except KeyError:
+            return False
+
     def __setitem__(self, key, value):
+        left, node_and_right = split(self.root, key)
+        old_node, right = split(node_and_right, key, eq_left=True)
+
+        if old_node is None:
+            self.len += 1
+
         node = Node(key, value, self.agg_f)
-        self.root = insert(self.root, node)
+        self.root = merge(left, merge(node, right))
+
+    def __len__():
+        return self.len
 
     def __iter__(self):
         if self.root is not None:
