@@ -1,4 +1,4 @@
-from treap import Treap
+from .treap import Treap
 
 class BridgeBSTAggregator:
     def __init__(self, key, value):
@@ -35,10 +35,15 @@ class BridgeBST(Treap):
 
     def bridge_before(self, key):
         res = self.agg_before(key, include_eq=True)
-        if res is not None and res.min_prefix_sum == 0:
-            return res.min_prefix_last_key
-        else:
+
+        if res is None:
+            return key
+        elif res.min_prefix_sum > 0:
             return min(res.min_key, key)
+        elif res.sum == 0:
+            return max(res.min_prefix_last_key, key)
+        else:
+            return res.min_prefix_last_key
 
     def bridge_after(self, key):
         after_res = self.agg_after(key, include_eq=True)
@@ -62,21 +67,3 @@ class BridgeBST(Treap):
     def __iter__(self):
         for k, v in super().__iter__():
             yield k, v.sum
-
-
-def test_bridge_bst():
-    bst = BridgeBST()
-    bst[6] = -1
-    bst[3] = 0
-    bst[0] = 1
-    assert bst.bridge_before(5) == 0
-    assert bst.bridge_after(5) == 6
-    assert bst.bridge_before(7) == 6
-    assert bst.bridge_after(7) == 7
-    assert bst.bridge_before(6) == 6
-    assert bst.bridge_after(6) == 6
-    print("test_update_bst() passed")
-
-if __name__ == "__main__":
-    test_bridge_bst()
-

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
-import collections
-from ordered_set import OrderedSet
-from bridge_bst import BridgeBST
-from max_bst import MaxBST
-from min_bst import MinBST
+from .ordered_set import OrderedSet
+from .bridge_bst import BridgeBST
+from .max_bst import MaxBST
+from .min_bst import MinBST
 
 class RetroactivePriorityQueue:
-    # assume t and k are unique integers
+    # Assumes that all keys are unique
+
     def __init__(self):
         self.q_now = OrderedSet()
         self.inserts_in_q = MinBST()
@@ -16,8 +16,6 @@ class RetroactivePriorityQueue:
 
     def _core_add_insert(self, t):
         bridge = self.bridges.bridge_before(t)
-        print([(key, value.sum) for key, value in self.bridges])
-        print("Bridge before {} is {}".format(t, bridge))
 
         insert_v, insert_t = self.deleted_inserts.agg_after(
             bridge, include_eq=True
@@ -39,8 +37,6 @@ class RetroactivePriorityQueue:
 
     def _core_add_delete(self, t):
         bridge = self.bridges.bridge_after(t)
-        print([(key, value.sum) for key, value in self.bridges])
-        print("Bridge after {} is {}".format(t, bridge))
 
         delete_v, delete_t = self.inserts_in_q.agg_before(
             bridge, include_eq=True
@@ -67,7 +63,6 @@ class RetroactivePriorityQueue:
         if self.bridges[t] < 0:
             # remove delete_min
             self._core_add_insert(t)
-            #self.bridges.remove(t)
         else:
             # remove insert
             self._core_add_delete(t)
@@ -75,6 +70,8 @@ class RetroactivePriorityQueue:
 
         self.bridges.remove(t)
 
+    def min(self):
+        return next(iter(self), None)
 
     def __iter__(self):
         yield from self.q_now

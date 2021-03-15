@@ -1,6 +1,6 @@
-from treap import Treap
+from .treap import Treap
 
-class OrderedSet(Treap):
+class OrderedSet():
     def __init__(self):
         self.treap = Treap(lambda x, y: None)
 
@@ -16,7 +16,3 @@ class OrderedSet(Treap):
 
     def remove(self, value):
         self.treap.remove(value)
-
-    def min(self):
-        return next(iter(self), None)
-

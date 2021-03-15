@@ -1,4 +1,4 @@
-from treap import Treap
+from .treap import Treap
 
 class MinBST(Treap):
     def __init__(self):
