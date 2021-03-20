@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from .ordered_set import OrderedSet
+from .ordered_multiset import OrderedMultiset
 from .bridge_bst import BridgeBST
 from .max_bst import MaxBST
 from .min_bst import MinBST
@@ -9,7 +9,7 @@ class RetroactivePriorityQueue:
     # Assumes that all keys are unique
 
     def __init__(self):
-        self.q_now = OrderedSet()
+        self.q_now = OrderedMultiset()
         self.inserts_in_q = MinBST()
         self.deleted_inserts = MaxBST()
         self.bridges = BridgeBST()
