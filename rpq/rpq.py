@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from .ordered_multiset import OrderedMultiset
-from .bridge_bst import BridgeBST
+from .zero_prefix_bst import ZeroPrefixBST
 from .max_bst import MaxBST
 from .min_bst import MinBST
 
@@ -12,32 +12,87 @@ class RetroactivePriorityQueue:
         self.q_now = OrderedMultiset()
         self.inserts_in_q = MinBST()
         self.deleted_inserts = MaxBST()
-        self.bridges = BridgeBST()
+        self.bridges = ZeroPrefixBST()
+        self.size_changes = ZeroPrefixBST()
 
-    def _core_add_insert(self, t):
-        bridge = self.bridges.bridge_before(t)
+    def add_insert(self, t, value):
+        if t in self.bridges:
+            raise KeyError
 
+        # Insert as if it is be deleted
+        self.deleted_inserts[t] = value
+        self.bridges[t] = 1
+        self.size_changes[t] = 1
+
+        # Find the value to insert in q_now
+        bridge = self.bridges.zero_prefix_before(t)
         insert_v, insert_t = self.deleted_inserts.agg_after(
             bridge, include_eq=True
         )
+
+        # Update BSTs
+        self.q_now.add(insert_v)
+        self.inserts_in_q[insert_t] = insert_v
+        self.deleted_inserts.remove(insert_t)
+        self.bridges[insert_t] = 0
+
+    def _remove_delete_min(self, t):
+        # Find the value to insert in q_now
+        bridge = self.bridges.zero_prefix_before(t)
+        insert_v, insert_t = self.deleted_inserts.agg_after(
+            bridge, include_eq=True
+        )
+
+        # Update BSTs
+        self.bridges.remove(t)
+        self.size_changes.remove(t)
 
         self.q_now.add(insert_v)
         self.inserts_in_q[insert_t] = insert_v
         self.deleted_inserts.remove(insert_t)
         self.bridges[insert_t] = 0
 
-    def add_insert(self, t, value):
+
+    def _is_empty_after(self, t):
+        agg_before = self.size_changes.agg_before(t, include_eq = True)
+        if agg_before is None or agg_before.sum == 0:
+            return True
+
+        agg = self.size_changes.agg()
+        if agg.min_prefix_sum == 0 and agg.min_prefix_last_key >= t:
+            return True
+        else:
+            return False
+
+    def add_delete_min(self, t):
         if t in self.bridges:
             raise KeyError
+        if self._is_empty_after(t):
+            raise ValueError
 
-        self.deleted_inserts[t] = value
-        self.bridges[t] = 1
-        self._core_add_insert(t)
+        bridge = self.bridges.zero_prefix_after(t)
+        delete_v, delete_t = self.inserts_in_q.agg_before(
+            bridge, include_eq=True
+        )
 
+        self.bridges[t] = -1
+        self.size_changes[t] = -1
 
-    def _core_add_delete(self, t):
-        bridge = self.bridges.bridge_after(t)
+        self.q_now.remove(delete_v)
+        self.inserts_in_q.remove(delete_t)
+        self.deleted_inserts[delete_t] = delete_v
+        self.bridges[delete_t] = 1
 
+    def _remove_insert_in_q(self, t):
+        v = self.inserts_in_q[t]
+
+        self.q_now.remove(v)
+        self.inserts_in_q.remove(t)
+        self.bridges.remove(t)
+        self.size_changes.remove(t)
+
+    def _remove_deleted_insert(self, t):
+        bridge = self.bridges.zero_prefix_after(t)
         delete_v, delete_t = self.inserts_in_q.agg_before(
             bridge, include_eq=True
         )
@@ -47,62 +102,25 @@ class RetroactivePriorityQueue:
         self.deleted_inserts[delete_t] = delete_v
         self.bridges[delete_t] = 1
 
-    def add_delete_min(self, t):
-        if t in self.bridges:
-            raise KeyError
-        if self.inserts_in_q.agg_before(t) is None:
-            raise ValueError
+        self.deleted_inserts.remove(t)
+        self.bridges.remove(t)
+        self.size_changes.remove(t)
 
-        self._core_add_delete(t)
-        self.bridges[t] = -1
 
     def remove(self, t):
         if t not in self.bridges:
             raise KeyError
 
-        if self.bridges[t] < 0:
-            # remove delete_min
-            self._core_add_insert(t)
+        op_type = self.bridges[t]
+
+        if op_type < 0:
+            self._remove_delete_min(t)
+        elif op_type == 0:
+            self._remove_insert_in_q(t)
         else:
-            # remove insert
-            self._core_add_delete(t)
-            self.deleted_inserts.remove(t)
-
-        self.bridges.remove(t)
-
-    def min(self):
-        return next(iter(self), None)
+            if self._is_empty_after(t):
+                raise ValueError
+            self._remove_deleted_insert(t)
 
     def __iter__(self):
         yield from self.q_now
-
-def test_priority_queue():
-    queue = RetroactivePriorityQueue()
-    assert list(queue) == []
-
-    queue.add_insert(0, 5)
-    assert list(queue) == [5]
-    queue.add_insert(10, 3)
-    assert list(queue) == [3, 5]
-    queue.add_delete_min(5)
-    assert list(queue) == [3]
-    queue.add_insert(2, 7)
-    assert list(queue) == [3, 7]
-    queue.add_insert(3, 4)
-    assert list(queue) == [3, 5, 7]
-    queue.add_delete_min(7)
-    assert list(queue) == [3, 7]
-
-    # delete insert
-    queue.remove(2)
-    assert list(queue) == [3]
-
-    # delete delete
-    queue.remove(5)
-    assert list(queue) == [3, 5]
-
-
-    print("test_priority_queue() passed")
-
-if __name__ == "__main__":
-    test_priority_queue()

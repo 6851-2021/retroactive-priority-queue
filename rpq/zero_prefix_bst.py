@@ -1,18 +1,20 @@
 from .treap import Treap
 
-class BridgeBSTAggregator:
+class MinPrefixSumAggregator:
     def __init__(self, key, value):
         self.sum = value
         self.min_key = key
+        self.max_key = key
 
         self.min_prefix_sum = value
         self.min_prefix_first_key = key
         self.min_prefix_last_key = key
 
     def __add__(self, other):
-        res = BridgeBSTAggregator(None, 0)
+        res = MinPrefixSumAggregator(None, 0)
         res.sum = self.sum + other.sum
-        res.min_key = min(self.min_key, other.min_key)
+        res.min_key = self.min_key
+        res.max_key = other.max_key
 
         other_min_prefix_sum = self.sum + other.min_prefix_sum
         res.min_prefix_sum = min(self.min_prefix_sum, other_min_prefix_sum)
@@ -29,12 +31,15 @@ class BridgeBSTAggregator:
 
         return res
 
-class BridgeBST(Treap):
+class ZeroPrefixBST(Treap):
     def __init__(self):
         super().__init__(lambda x, y: x + y)
 
-    def bridge_before(self, key):
-        res = self.agg_before(key, include_eq=True)
+    def zero_prefix_before(self, key):
+        """
+        max k <= key such that the sum of all operations < k is 0
+        """
+        res = self.agg_before(key, include_eq=False)
 
         if res is None:
             return key
@@ -45,24 +50,30 @@ class BridgeBST(Treap):
         else:
             return res.min_prefix_last_key
 
-    def bridge_after(self, key):
-        after_res = self.agg_after(key, include_eq=True)
+    def zero_prefix_after(self, key):
+        """
+        Min k >= key such that the sum of all operations <= k is 0
+        None if no such k exists
+        """
+        after_res = self.agg_after(key, include_eq=False)
         if after_res is None:
             return key
 
         before_sum = self.agg().sum - after_res.sum
+        min_prefix_in_res = before_sum + after_res.min_prefix_sum
+
         if before_sum == 0:
             return key
-
-        prefix_sum = before_sum + after_res.min_prefix_sum
-        assert prefix_sum == 0
-        return after_res.min_prefix_first_key
+        elif min_prefix_in_res == 0:
+            return after_res.min_prefix_first_key
+        else:
+            return None
 
     def __getitem__(self, key):
         return super().__getitem__(key).sum
 
     def __setitem__(self, key, value):
-        super().__setitem__(key, BridgeBSTAggregator(key, value))
+        super().__setitem__(key, MinPrefixSumAggregator(key, value))
 
     def __iter__(self):
         for k, v in super().__iter__():
