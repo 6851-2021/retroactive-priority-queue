@@ -20,10 +20,10 @@ class RandomRPQTest(unittest.TestCase):
         if self.verbose:
             print("RPQ STATE:")
             print("    TEST_OP  {}".format(self.operations))
-            print("    BRDG     {}".format(list(self.rpq.bridges)))
-            print("    SIZE     {}".format(list(self.rpq.size_changes)))
-            print("    DEL_INS  {}".format(list(self.rpq.deleted_inserts)))
-            print("    INS_IN_Q {}".format(list(self.rpq.inserts_in_q)))
+            print("    BRDG     {}".format(list(self.rpq._bridges)))
+            print("    SIZE     {}".format(list(self.rpq._size_changes)))
+            print("    DEL_INS  {}".format(list(self.rpq._deleted_inserts)))
+            print("    INS_IN_Q {}".format(list(self.rpq._inserts_in_q)))
 
     def verify_q_now(self):
         self.dump_state()
@@ -37,6 +37,7 @@ class RandomRPQTest(unittest.TestCase):
         expected_q_now = list(sorted(heap))
         actual_q_now = list(self.rpq)
         self.assertEqual(expected_q_now, actual_q_now)
+        self.assertEqual(len(expected_q_now), len(self.rpq))
 
     def add_insert(self, t, v):
         self.log("add_insert({}, {})".format(t, v))

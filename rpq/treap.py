@@ -102,31 +102,31 @@ def find(root, key):
 
 class Treap:
     def __init__(self, agg_f):
-        self.agg_f = agg_f
-        self.root = None
-        self.len = 0
+        self._agg_f = agg_f
+        self._root = None
+        self._len = 0
 
     def remove(self, key):
-        self.root = remove(self.root, key)
-        self.len -= 1
+        self._root = remove(self._root, key)
+        self._len -= 1
 
     def agg_before(self, key, include_eq = False):
-        before, after = split(self.root, key, eq_left = include_eq)
+        before, after = split(self._root, key, eq_left = include_eq)
         result = before.agg if before is not None else None
-        self.root = merge(before, after)
+        self._root = merge(before, after)
         return result
 
     def agg_after(self, key, include_eq = False):
-        before, after = split(self.root, key, eq_left = not include_eq)
+        before, after = split(self._root, key, eq_left = not include_eq)
         result = after.agg if after is not None else None
-        self.root = merge(before, after)
+        self._root = merge(before, after)
         return result
 
     def agg(self):
-        return self.root.agg if self.root else None
+        return self._root.agg if self._root else None
 
     def __getitem__(self, key):
-        return find(self.root, key)
+        return find(self._root, key)
 
     def __contains__(self, key):
         try:
@@ -136,19 +136,19 @@ class Treap:
             return False
 
     def __setitem__(self, key, value):
-        left, node_and_right = split(self.root, key)
+        left, node_and_right = split(self._root, key)
         old_node, right = split(node_and_right, key, eq_left=True)
 
         if old_node is None:
-            self.len += 1
+            self._len += 1
 
-        node = Node(key, value, self.agg_f)
-        self.root = merge(left, merge(node, right))
+        node = Node(key, value, self._agg_f)
+        self._root = merge(left, merge(node, right))
 
     def __len__():
-        return self.len
+        return self._len
 
     def __iter__(self):
-        if self.root is not None:
-            yield from self.root
+        if self._root is not None:
+            yield from self._root
 
