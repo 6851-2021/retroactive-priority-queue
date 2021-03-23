@@ -6,9 +6,21 @@ from .max_bst import MaxBST
 from .min_bst import MinBST
 
 class RetroactivePriorityQueue:
-    # Assumes that all keys are unique
+    """A partially retroactive priority queue.
+
+    A priority queue can be represented as a sequence of *insert* and
+    *delete-min* operations, each with a unique *time*. This data structure
+    efficently supports:
+        - Adding or removing an operation at a given time.
+        - Observing the contents of the queue after all operations have been
+          applied (using the standard Collection interface).
+
+    The times of all operations must be totally ordered and the values
+    inserted in the queue must be partially ordered.
+    """
 
     def __init__(self):
+        """Initialize a queue with no operations."""
         self._q_now = OrderedMultiset()
         self._inserts_in_q = MinBST()
         self._deleted_inserts = MaxBST()
@@ -53,6 +65,15 @@ class RetroactivePriorityQueue:
             return False
 
     def add_insert(self, t, value):
+        """Create a new insert operation
+
+        Args:
+            t: The time at which the insertion is performed.
+            value: The value to be inserted at time t.
+
+        Raises:
+            KeyError: If the queue already contains an operation with time t.
+        """
         if t in self._bridges:
             raise KeyError
 
@@ -74,6 +95,16 @@ class RetroactivePriorityQueue:
 
 
     def add_delete_min(self, t):
+        """Create a new delete-min operation
+
+        Args:
+            t: The time at which the delete-min is performed.
+
+        Raises:
+            KeyError: If the queue already contains an operation with time t.
+            ValueError: If performing a delete-min at time t would lead to a
+                delete-min on an empty queue at some time t* >= t.
+        """
         if t in self._bridges:
             raise KeyError
         if self._is_empty_after(t):
@@ -104,6 +135,18 @@ class RetroactivePriorityQueue:
 
 
     def remove(self, t):
+        """Remove an operation
+
+        Args:
+            t: The time of the operation to be removed.
+
+        Raises:
+            KeyError: If the queue does not contain an operation with time t.
+            ValueError: If the operation at time t is an insertion and removing
+                it would lead to a delete-min on an empty queue at some time
+                t* > t.
+        """
+
         if t not in self._bridges:
             raise KeyError
 
@@ -119,7 +162,22 @@ class RetroactivePriorityQueue:
             self._remove_deleted_insert(t)
 
     def __iter__(self):
+        """
+        Yields:
+            The values in the queue after all operations are performed.
+        """
         yield from self._q_now
 
     def __len__(self):
+        """
+        Returns:
+            The size of the queue after all operations are performed.
+        """
         return len(self._q_now)
+
+    def __contains__(self, v):
+        """
+        Returns:
+            Whether the queue contains v after all operations are performed.
+        """
+        return v in self._q_now

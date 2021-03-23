@@ -36,9 +36,8 @@ class ZeroPrefixBST(Treap):
         super().__init__(lambda x, y: x + y)
 
     def zero_prefix_before(self, key):
-        """
-        max k <= key such that the sum of all operations < k is 0
-        """
+        # Returns the maximum k <= key such that the values of all operations
+        # with keys <k sum up to 0
         res = self.agg_before(key, include_eq=False)
 
         if res is None:
@@ -51,10 +50,9 @@ class ZeroPrefixBST(Treap):
             return res.min_prefix_last_key
 
     def zero_prefix_after(self, key):
-        """
-        Min k >= key such that the sum of all operations <= k is 0
-        None if no such k exists
-        """
+        # Returns the minimum k >= key such that the values of all operations
+        # with keys <= k sum to 0 (and None if no such k exists)
+
         after_res = self.agg_after(key, include_eq=False)
         if after_res is None:
             return key
