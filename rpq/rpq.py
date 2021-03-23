@@ -1,11 +1,17 @@
 #!/usr/bin/env python3
+from typing import Generic, TypeVar
+from collections.abc import Collection, Iterator
 
 from .ordered_multiset import OrderedMultiset
 from .zero_prefix_bst import ZeroPrefixBST
 from .max_bst import MaxBST
 from .min_bst import MinBST
 
-class RetroactivePriorityQueue:
+
+T = TypeVar("T")
+V = TypeVar("V")
+
+class RetroactivePriorityQueue(Generic[T, V], Collection[V]):
     """A partially retroactive priority queue.
 
     A priority queue can be represented as a sequence of *insert* and
@@ -64,7 +70,7 @@ class RetroactivePriorityQueue:
         else:
             return False
 
-    def add_insert(self, t, value):
+    def add_insert(self, t: T, value: V):
         """Create a new insert operation
 
         Args:
@@ -94,7 +100,7 @@ class RetroactivePriorityQueue:
         self._promote_to_q(insert_t, insert_v)
 
 
-    def add_delete_min(self, t):
+    def add_delete_min(self, t: T):
         """Create a new delete-min operation
 
         Args:
@@ -125,7 +131,7 @@ class RetroactivePriorityQueue:
         self._bridges.remove(t)
         self._size_changes.remove(t)
 
-    def _remove_deleted_insert(self, t):
+    def _remove_deleted_insert(self, t: T):
         delete_t, delete_v = self._delete_for_t(t)
         self._delete_from_q(delete_t, delete_v)
 
@@ -134,7 +140,7 @@ class RetroactivePriorityQueue:
         self._size_changes.remove(t)
 
 
-    def remove(self, t):
+    def remove(self, t: T):
         """Remove an operation
 
         Args:
@@ -161,21 +167,21 @@ class RetroactivePriorityQueue:
                 raise ValueError
             self._remove_deleted_insert(t)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[V]:
         """
         Yields:
             The values in the queue after all operations are performed.
         """
         yield from self._q_now
 
-    def __len__(self):
+    def __len__(self) -> int:
         """
         Returns:
             The size of the queue after all operations are performed.
         """
         return len(self._q_now)
 
-    def __contains__(self, v):
+    def __contains__(self, v) -> bool:
         """
         Returns:
             Whether the queue contains v after all operations are performed.
