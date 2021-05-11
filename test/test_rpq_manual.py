@@ -31,3 +31,14 @@ class PriorityQueueManualTest(unittest.TestCase):
         # delete delete
         queue.remove(5)
         self.assertEqual([3, 5], list(queue))
+
+    def test_get_min(self):
+        queue = RetroactivePriorityQueue()
+        self.assertEqual(None, queue.get_min())
+
+        queue.add_insert(2, 3)
+        queue.add_insert(5, 8)
+        self.assertEqual(3, queue.get_min())
+
+        queue.remove(2)
+        self.assertEqual(8, queue.get_min())

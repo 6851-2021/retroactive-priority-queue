@@ -170,20 +170,33 @@ class RetroactivePriorityQueue(Generic[T, V], Collection[V]):
     def __iter__(self) -> Iterator[V]:
         """
         Yields:
-            The values in the queue after all operations are performed.
+            The values in the queue after all operations have been performed,
+            sorted in ascending order.
         """
         yield from self._q_now
 
     def __len__(self) -> int:
         """
         Returns:
-            The size of the queue after all operations are performed.
+            The size of the queue after all operations have been performed.
         """
         return len(self._q_now)
 
     def __contains__(self, v) -> bool:
         """
         Returns:
-            Whether the queue contains v after all operations are performed.
+            Whether the queue contains v after all operations have been
+            performed.
         """
         return v in self._q_now
+
+    def get_min(self) -> V:
+        """
+        Returns:
+            The smallest element in the queue after all operations have been
+            performed or `None` if the queue is empty.
+        """
+        try:
+            return self.__iter__().__next__()
+        except StopIteration:
+            return None
