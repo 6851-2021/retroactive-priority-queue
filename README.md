@@ -14,6 +14,13 @@ of the timeline by using the data structure proposed in the [Retroactive Data
 Structures][retro-ds] paper by Demaine, Iacono, and Langerman.
 
 # Usage
+## Install
+To install the package, run
+```shell
+python3 -m pip install git+https://github.com/6851-2021/retroactive-priority-queue.git
+```
+Requires Python `>=3.9`
+## Example
 ```python
 >>> from retropq import RetroactivePriorityQueue
 >>> q = RetroactivePriorityQueue()
@@ -58,7 +65,7 @@ in the source code.
 ## Testing
 To run the tests, execute at the repository root:
 ```
-python -m unittest
+python3 -m unittest
 ```
 
 [retro-ds]: http://erikdemaine.org/papers/Retroactive_TALG/
