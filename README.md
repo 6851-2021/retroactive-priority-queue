@@ -14,7 +14,7 @@ of the timeline by using the data structure proposed in the [Retroactive Data
 Structures][retro-ds] paper by Demaine, Iacono, and Langerman.
 
 # Usage
-```
+```python
 >>> from retropq import RetroactivePriorityQueue
 >>> q = RetroactivePriorityQueue()
 
