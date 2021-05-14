@@ -2,7 +2,7 @@ import unittest
 import random
 import heapq
 
-from rpq import RetroactivePriorityQueue
+from retropq import RetroactivePriorityQueue
 
 
 class RandomRPQTest(unittest.TestCase):

@@ -1,5 +1,5 @@
 import unittest
-from rpq.zero_prefix_bst import ZeroPrefixBST
+from retropq.zero_prefix_bst import ZeroPrefixBST
 
 class ZeroPrefixBSTTest(unittest.TestCase):
     def test(self):

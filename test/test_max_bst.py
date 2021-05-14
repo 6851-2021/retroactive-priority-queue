@@ -1,5 +1,5 @@
 import unittest
-from rpq.max_bst import MaxBST
+from retropq.max_bst import MaxBST
 
 class MaxBSTTest(unittest.TestCase):
     def test(self):

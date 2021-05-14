@@ -1,5 +1,5 @@
 import unittest
-from rpq.rpq import RetroactivePriorityQueue
+from retropq import RetroactivePriorityQueue
 
 class PriorityQueueManualTest(unittest.TestCase):
     def test_simple(self):

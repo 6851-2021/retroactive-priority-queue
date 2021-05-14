@@ -15,7 +15,7 @@ Structures][retro-ds] paper by Demaine, Iacono, and Langerman.
 
 # Usage
 ```
->>> from rpq import RetroactivePriorityQueue
+>>> from retropq import RetroactivePriorityQueue
 >>> q = RetroactivePriorityQueue()
 
 >>> # Add insertions
